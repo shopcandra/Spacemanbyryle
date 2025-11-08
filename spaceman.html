@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spaceman</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      color: #222;
+      background: linear-gradient(180deg, #ffffff, #e6f0ff);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    header {
+      width: 100%;
+      background: linear-gradient(90deg, #4fa3ff, #8ec5fc);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.2);
+      font-weight: bold;
+      color: white;
+    }
+
+    header h1 {
+      font-size: 20px;
+    }
+
+    .saldo {
+      background: rgba(255,255,255,0.3);
+      padding: 6px 14px;
+      border-radius: 10px;
+      color: #004aad;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    #backBtn {
+      position: absolute;
+      top: 60px;
+      left: 20px;
+      background: #ff4b5c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(0,0,0,0.3);
+      transition: 0.2s;
+    }
+    #backBtn:hover { background: #ff6c7a; }
+
+    main {
+      text-align: center;
+      margin-top: 40px;
+      width: 100%;
+    }
+
+    .multiplier {
+      font-size: 50px;
+      font-weight: bold;
+      margin: 10px 0;
+      color: #007bff;
+      text-shadow: 0 0 10px rgba(0,0,0,0.1);
+      position: relative;
+      z-index: 5;
+    }
+
+    .roket {
+      width: 70px;
+      height: 70px;
+      background: url('roket.png') no-repeat center/contain;
+      margin: 20px auto;
+      transition: transform 0.1s linear;
+      position: relative;
+      z-index: 1;
+    }
+
+    .explosion {
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 120, 0, 0.9) 0%, rgba(255, 0, 0, 0.5) 40%, transparent 70%);
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, -50%) scale(0);
+      left: 50%;
+      top: 50%;
+      animation: explode 0.7s ease-out forwards;
+      box-shadow: 0 0 30px 10px rgba(255, 120, 0, 0.6);
+      z-index: 2;
+    }
+
+    @keyframes explode {
+      0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); filter: blur(2px); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); filter: blur(4px); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(2.5); filter: blur(8px); }
+    }
+
+    @keyframes shake {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(4px, -4px); }
+      50% { transform: translate(-4px, 4px); }
+      75% { transform: translate(4px, 4px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    .controls {
+      margin-top: 10px;
+    }
+
+    input {
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      width: 150px;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    button {
+      margin: 6px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    #startBtn { background: #007bff; color: white; }
+    #cashoutHalfBtn { background: #ffb700; color: white; display: none; }
+    #cashoutFullBtn { background: #00c851; color: white; display: none; }
+
+    .history {
+      margin-top: 25px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 10px;
+      padding: 10px;
+      width: 90%;
+      max-width: 420px;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    .history h3 {
+      margin: 0 0 10px 0;
+      color: #007bff;
+    }
+
+    .history-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .history-item {
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-weight: bold;
+      background: rgba(0,0,0,0.1);
+      color: #333;
+    }
+
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+
+    .toast {
+      background: rgba(255,255,255,0.9);
+      color: #222;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      min-width: 220px;
+      text-align: center;
+      animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+      box-shadow: 0 0 8px rgba(0,0,0,0.3);
+    }
+
+    .toast.success { border-left: 5px solid #00c851; }
+    .toast.warning { border-left: 5px solid #ffa500; }
+    .toast.error { border-left: 5px solid #ff4444; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeOut {
+      to { opacity: 0; transform: translateY(-20px); }
+    }
+
+    .countdown {
+      font-size: 18px;
+      color: #007bff;
+      font-weight: 600;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🚀 Spaceman YAPSA</h1>
+    <div class="saldo">💰 Saldo: <span id="saldoUser">0</span></div>
+  </header>
+
+  <button id="backBtn">⬅ Kembali</button>
+
+  <main>
+    <div class="multiplier" id="multiplier">x1.00</div>
+    <div class="countdown" id="countdown"></div>
+    <div class="roket" id="roket"></div>
+
+    <div class="controls">
+      <input type="text" id="taruhan" value="2.000">
+      <div>
+        <button id="startBtn">KONFIRMASI TARUHAN</button>
+        <button id="cashoutHalfBtn">TARIK SETENGAH DULU</button>
+        <button id="cashoutFullBtn">TARIK SEMUA</button>
+      </div>
+
+      <!-- 🔹 Keterangan hasil cash out -->
+      <div id="cashoutInfo" style="margin-top: 8px; font-size: 14px; color: #004aad; font-weight: 600; display: none;">
+        💰 Tarik Setengah: Rp 0<br>
+        💸 Tarik Semua: Rp 0
+      </div>
+    </div>
+
+    <div class="history">
+      <h3>Riwayat Crash</h3>
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+<script>
+  let saldo = parseInt(localStorage.getItem("saldoUser")) || 0;
+  let multiplier = 1.00;
+  let running = false;
+  let crashPoint = randomCrash();
+  let interval;
+  let taruhan = 2000;
+  let ikutTaruhan = false;
+  let cashedHalf = false;
+  let cashedFull = false;
+  let waitingNextRound = false;
+  let countdownTimer;
+
+  const audioRocket = new Audio('rocket.mp3');
+  const audioCrash = new Audio('explosion.mp3');
+  const audioCountdown = new Audio('countdown.mp3');
+
+  let riwayat = JSON.parse(localStorage.getItem("crashHistory") || "[]");
+  if (riwayat.length === 0) {
+    riwayat = Array.from({ length: 10 }, () => (Math.random() * 5 + 1).toFixed(2));
+    localStorage.setItem("crashHistory", JSON.stringify(riwayat));
+  }
+
+  const saldoUser = document.getElementById("saldoUser");
+  const multiplierDisplay = document.getElementById("multiplier");
+  const rocket = document.getElementById("roket");
+  const startBtn = document.getElementById("startBtn");
+  const cashoutHalfBtn = document.getElementById("cashoutHalfBtn");
+  const cashoutFullBtn = document.getElementById("cashoutFullBtn");
+  const historyList = document.getElementById("historyList");
+  const toastContainer = document.getElementById("toastContainer");
+  const taruhanInput = document.getElementById("taruhan");
+  const countdownDisplay = document.getElementById("countdown");
+  const cashoutInfo = document.getElementById("cashoutInfo");
+
+  saldoUser.textContent = formatRupiah(saldo);
+  renderHistory();
+  startGame();
+
+  taruhanInput.addEventListener("input", (e) => {
+    let value = e.target.value.replace(/\D/g, "");
+    if (value === "") value = "0";
+    e.target.value = formatRupiah(value);
+  });
+
+  function showToast(message, type = "success") {
+    const toast = document.createElement("div");
+    toast.classList.add("toast", type);
+    toast.textContent = message;
+    toastContainer.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+
+  function startGame() {
+    if (running) return;
+    multiplier = 1.00;
+    crashPoint = randomCrash();
+    cashedHalf = false;
+    cashedFull = false;
+    running = true;
+    waitingNextRound = false;
+    multiplierDisplay.textContent = "x1.00";
+    rocket.style.transform = "translateY(0)";
+    startBtn.style.display = "none";
+    taruhanInput.disabled = true;
+    cashoutInfo.style.display = "none";
+
+    audioRocket.loop = true;
+    audioRocket.play();
+
+    interval = setInterval(updateGame, 100);
+  }
+
+  function updateGame() {
+    multiplier += 0.05;
+    multiplierDisplay.textContent = "x" + multiplier.toFixed(2);
+
+    let maxTranslate = 200;
+    let translateY = Math.min(multiplier * 5, maxTranslate);
+    rocket.style.transform = `translateY(-${translateY}px)`;
+
+    if (ikutTaruhan && !cashedFull) {
+      cashoutHalfBtn.style.display = "inline-block";
+      cashoutFullBtn.style.display = "inline-block";
+      cashoutInfo.style.display = "block";
+
+      // 🔹 Hitung dan tampilkan potensi hasil
+      const halfWin = Math.floor((taruhan * multiplier) / 2);
+      const fullWin = Math.floor(taruhan * multiplier);
+      cashoutInfo.innerHTML = `
+        💰 Tarik Setengah: Rp ${formatRupiah(halfWin)}<br>
+        💸 Tarik Semua: Rp ${formatRupiah(fullWin)}
+      `;
+    } else {
+      cashoutInfo.style.display = "none";
+    }
+
+    if (multiplier >= crashPoint) crash();
+  }
+
+  function crash() {
+    clearInterval(interval);
+    running = false;
+    audioRocket.pause();
+    audioCrash.play();
+
+    const explosion = document.createElement("div");
+    explosion.classList.add("explosion");
+    rocket.appendChild(explosion);
+    rocket.style.animation = "shake 0.4s ease-in-out";
+    setTimeout(() => rocket.style.opacity = "0", 300);
+
+    if (ikutTaruhan && !cashedFull && !cashedHalf) {
+      showToast(`💥 Kamu gagal di x${multiplier.toFixed(2)}`, "error");
+    }
+
+    setTimeout(() => {
+      explosion.remove();
+      rocket.style.animation = "";
+      rocket.style.opacity = "1";
+      rocket.style.transform = "translateY(0)";
+      addHistory(multiplier);
+      waitNextRound();
+    }, 1000);
+  }
+
+  function waitNextRound() {
+    ikutTaruhan = false;
+    cashoutHalfBtn.style.display = "none";
+    cashoutFullBtn.style.display = "none";
+    cashoutInfo.style.display = "none";
+startBtn.disabled = false; // 🔓 Aktifkan kembali tombol di ronde berikutnya
+    waitingNextRound = true;
+    let timeLeft = 10;
+    countdownDisplay.textContent = `Mulai dalam ${timeLeft}s`;
+    audioCountdown.play();
+
+    countdownTimer = setInterval(() => {
+      timeLeft--;
+      countdownDisplay.textContent = `Mulai dalam ${timeLeft}s`;
+      audioCountdown.currentTime = 0;
+      audioCountdown.play();
+
+      if (timeLeft < 0) {
+        clearInterval(countdownTimer);
+        countdownDisplay.textContent = "";
+        waitingNextRound = false;
+        startGame();
+      }
+    }, 1000);
+
+    startBtn.style.display = "inline-block";
+    taruhanInput.disabled = false;
+  }
+
+  function addHistory(mult) {
+    riwayat.unshift(mult.toFixed(2));
+    if (riwayat.length > 15) riwayat.pop();
+    localStorage.setItem("crashHistory", JSON.stringify(riwayat));
+    renderHistory();
+  }
+
+  function renderHistory() {
+    historyList.innerHTML = "";
+    riwayat.forEach(v => {
+      const item = document.createElement("div");
+      item.classList.add("history-item");
+      item.textContent = "x" + v;
+      historyList.appendChild(item);
+    });
+  }
+
+  startBtn.addEventListener("click", () => {
+  if (running) {
+    showToast("⛔ Tunggu ronde selesai!", "warning");
+    return;
+  }
+
+  if (ikutTaruhan) {
+    showToast("⚠️ Kamu sudah ikut ronde ini!", "warning");
+    return;
+  }
+
+  taruhan = parseInt(taruhanInput.value.replace(/\./g, "")) || 2000;
+  if (taruhan > saldo) {
+    showToast("❌ Saldo tidak cukup!", "error");
+    return;
+  }
+
+  ikutTaruhan = true;
+  saldo -= taruhan;
+  localStorage.setItem("saldoUser", saldo);
+  saldoUser.textContent = formatRupiah(saldo);
+
+  startBtn.disabled = true; // 🔒 Nonaktifkan tombol agar tidak bisa diklik lagi
+
+  showToast("🎮 Kamu ikut ronde ini!", "success");
+});
+
+  cashoutHalfBtn.addEventListener("click", () => {
+    if (!ikutTaruhan || cashedHalf || !running) return;
+    cashedHalf = true;
+    const win = (taruhan * multiplier) / 2;
+    saldo += Math.floor(win);
+    localStorage.setItem("saldoUser", saldo);
+    saldoUser.textContent = formatRupiah(saldo);
+    showToast(`🟡 Cash Out ½ di x${multiplier.toFixed(2)}`, "warning");
+  });
+
+  cashoutFullBtn.addEventListener("click", () => {
+  if (!ikutTaruhan || cashedFull || !running) return;
+  cashedFull = true;
+  const win = taruhan * multiplier * (cashedHalf ? 0.5 : 1);
+  saldo += Math.floor(win);
+  localStorage.setItem("saldoUser", saldo);
+  saldoUser.textContent = formatRupiah(saldo);
+  showToast(`💰 Cash Out penuh di x${multiplier.toFixed(2)}`, "success");
+
+  // 🔹 Langsung sembunyikan tombol cashout setelah tarik semua
+  cashoutHalfBtn.style.display = "none";
+  cashoutFullBtn.style.display = "none";
+  cashoutInfo.style.display = "none";
+
+  ikutTaruhan = false; // agar tidak bisa tarik lagi di ronde yang sama
+});
+
+  document.getElementById("backBtn").addEventListener("click", () => {
+    window.location.href = "index.html";
+  });
+
+  function randomCrash() {
+    let phase = localStorage.getItem("crashPhase") || "normal";
+    let count = parseInt(localStorage.getItem("crashCount") || "0");
+    let point = 0;
+
+    if (phase === "normal") {
+      point = (Math.random() * 7 + 2).toFixed(2);
+      count++;
+      if (count >= 6) { count = 0; phase = "big"; }
+    } else if (phase === "big") {
+      point = (Math.random() * 280 + 20).toFixed(2);
+      phase = "small";
+      count = 0;
+    } else if (phase === "small") {
+      point = (Math.random() * 2 + 1).toFixed(2);
+      count++;
+      if (count >= 5) { phase = "normal"; count = 0; }
+    }
+
+    localStorage.setItem("crashPhase", phase);
+    localStorage.setItem("crashCount", count);
+    return parseFloat(point);
+  }
+
+  function formatRupiah(angka) {
+    return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+</script>
+<!-- 🔹 PANEL BOT ADMIN DENGAN PREDIKSI 100% BENAR -->
+<style>
+  #adminLoginPanel, #adminPanel {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 14px 18px;
+    border-radius: 12px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.4);
+    font-size: 14px;
+    z-index: 999;
+  }
+  #adminLoginPanel {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    width: 200px;
+  }
+  #adminLoginPanel input {
+    padding: 6px;
+    border: none;
+    border-radius: 6px;
+    outline: none;
+    font-size: 13px;
+  }
+  #adminLoginPanel button {
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  #adminPanel {
+    display: none;
+    min-width: 200px;
+  }
+  #adminPanel h4 {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+    padding-bottom: 4px;
+  }
+  #adminPanel .crashInfo {
+    text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+    color: #00ff9c;
+  }
+  #toggleAdminLogin {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: #007bff;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(0,0,0,0.4);
+    z-index: 998;
+  }
+</style>
+
+<button id="toggleAdminLogin">👨‍💻 Admin</button>
+
+<div id="adminLoginPanel">
+  <input type="text" id="adminUser" placeholder="Username Admin">
+  <input type="password" id="adminPass" placeholder="Password Admin">
+  <button id="loginAdminBtn">Login</button>
+</div>
+
+<div id="adminPanel">
+  <h4>📊 Panel Bot Admin</h4>
+  <div class="crashInfo" id="crashInfoText">Menunggu data...</div>
+  <button id="logoutAdminBtn" style="margin-top:8px;background:#ff4b5c;">Logout</button>
+</div>
+</body>
+</html>
