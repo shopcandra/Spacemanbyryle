@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YAPSA-SPACEMAN</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      color: white;
+      background: linear-gradient(180deg, #041031, #000);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #081b4b;
+      padding: 12px 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    }
+
+    .logo h1 {
+      font-size: 20px;
+      color: #4fc3f7;
+    }
+
+    .saldo {
+      font-weight: bold;
+      color: #ffd700;
+    }
+
+    .content {
+      flex: 1;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .banner {
+      background: rgba(255,255,255,0.05);
+      padding: 15px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+    }
+
+    .game-card {
+      display: inline-block;
+      width: 150px;
+      margin: 10px;
+      padding: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .game-card:hover {
+      transform: scale(1.05);
+      background: rgba(79,195,247,0.2);
+    }
+
+    .game-card img {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    .bottom-nav {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background: #081b4b;
+      padding: 10px 0;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 20px;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .nav-btn.active, .nav-btn:hover {
+      color: #4fc3f7;
+    }
+
+    /* Popup Top Up */
+    .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .popup-content {
+      background: #081b4b;
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+      width: 90%;
+      max-width: 350px;
+      box-shadow: 0 0 15px rgba(255,255,255,0.1);
+    }
+
+    .popup-content h2 {
+      margin-top: 0;
+      color: #4fc3f7;
+    }
+
+    .nominal-list button {
+      margin: 8px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      background: #1a3a80;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .nominal-list button:hover {
+      background: #4fc3f7;
+    }
+
+    .payment-methods button {
+      margin: 8px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 10px;
+      background: #2929a3;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .payment-methods button:hover {
+      background: #4fc3f7;
+    }
+
+    .confirm-btn {
+      background: #4fc3f7;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: black;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .close-btn {
+      background: #ff0055;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: white;
+      margin-top: 10px;
+    }
+
+    .selected {
+      background: #ffd700 !important;
+      color: black !important;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body class="dashboard">
+  <header class="top-bar">
+    <div class="logo"><h1>🌌 yapsa</h1></div>
+    <div class="saldo">💰 Saldo: <span id="saldoUser">0</span></div>
+  </header>
+
+  <main class="content">
+    <section class="banner">
+      <h2>Selamat Datang, Pilot Spaceman! 🚀</h2>
+      <p>Isi saldo minimal Rp10.000 sebelum mulai bermain.</p>
+    </section>
+
+    <div class="game-card" id="spacemanCard">
+      <img src="spacelog.jpeg" alt="Spaceman Game">
+      <p>🚀 Spaceman by Rylee ni bos ridwan bangsat</p>
+    </div>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active">🏠 Home</button>
+    <button class="nav-btn" id="topupBtn">💵 Top Up</button>
+  </nav>
+
+  <!-- Popup Top Up -->
+  <div class="popup" id="topupPopup">
+    <div class="popup-content">
+      <h2>💵 Top Up Saldo</h2>
+      <p>Pilih nominal top up:</p>
+      <div class="nominal-list" id="nominalList">
+        <button data-value="10000">Rp10.000</button>
+        <button data-value="20000">Rp20.000</button>
+        <button data-value="50000">Rp50.000</button>
+        <button data-value="100000">Rp100.000</button>
+      </div>
+
+      <p>Pilih metode pembayaran:</p>
+      <div class="payment-methods" id="paymentMethods">
+        <button data-pay="DANA">DANA</button>
+        <button data-pay="OVO">OVO</button>
+        <button data-pay="GoPay">GoPay</button>
+        <button data-pay="BANK">Bank Transfer</button>
+      </div>
+
+      <button class="confirm-btn" id="confirmTopup">Konfirmasi</button>
+      <br>
+      <button class="close-btn" id="closePopup">Tutup</button>
+    </div>
+  </div>
+
+  <script>
+    let saldo = localStorage.getItem("saldoUser") || 0;
+    let selectedNominal = 0;
+    let selectedPayment = null;
+
+    const saldoUser = document.getElementById("saldoUser");
+    const popup = document.getElementById("topupPopup");
+    const confirmBtn = document.getElementById("confirmTopup");
+
+    saldoUser.textContent = saldo;
+
+    // Buka popup topup
+    document.getElementById("topupBtn").addEventListener("click", () => {
+      popup.style.display = "flex";
+    });
+
+    // Tutup popup
+    document.getElementById("closePopup").addEventListener("click", () => {
+      popup.style.display = "none";
+      resetSelection();
+    });
+
+    // Pilih nominal
+    document.querySelectorAll("#nominalList button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#nominalList button").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        selectedNominal = parseInt(btn.getAttribute("data-value"));
+      });
+    });
+
+    // Pilih metode pembayaran
+    document.querySelectorAll("#paymentMethods button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#paymentMethods button").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        selectedPayment = btn.getAttribute("data-pay");
+      });
+    });
+
+    // Konfirmasi topup
+    confirmBtn.addEventListener("click", () => {
+      if (selectedNominal < 10000) {
+        alert("Minimal top up Rp10.000!");
+        return;
+      }
+      if (!selectedPayment) {
+        alert("Pilih metode pembayaran dulu!");
+        return;
+      }
+      alert(`Pembayaran melalui ${selectedPayment} berhasil!\nSaldo kamu bertambah Rp${selectedNominal.toLocaleString()}.`);
+      saldo = parseInt(saldo) + selectedNominal;
+      localStorage.setItem("saldoUser", saldo);
+      saldoUser.textContent = saldo;
+      popup.style.display = "none";
+      resetSelection();
+    });
+
+    function resetSelection() {
+      selectedNominal = 0;
+      selectedPayment = null;
+      document.querySelectorAll("button.selected").forEach(b => b.classList.remove("selected"));
+    }
+
+    // Masuk ke game Spaceman
+    document.getElementById("spacemanCard").addEventListener("click", () => {
+      if (saldo < 2000) {
+        alert("Saldo kamu belum cukup! Minimal Rp2.000 untuk bermain 🚫");
+      } else {
+        window.location.href = "spaceman.html";
+      }
+    });
+  </script>
+</body>
+</html>
